@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    # Ingress class here should match the one defined in AWS-LBC.
+    # When AWS-LBC is installed, it watches for its class name and
+    # creates an ALB when this file is applied.
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing # Optional: Use 'internet-facing' or 'internal' for private ALB
+    alb.ingress.kubernetes.io/target-type: ip # Optional: Use 'instance' if targets are EC2 instances
+    kubernetes.io/ingress.class: alb # This annotation is essential for AWS Load Balancer Controller
+spec:
+  rules:
+    - host: "myapp.com" # This domain should be mapped to the ALB's DNS or Route 53.
+      http:
+        paths:
+          - path: "/*"
+            pathType: ImplementationSpecific # Updated to correct Kubernetes pathType
+            backend:
+              service:
+                name: nginx-demo
+                port:
+                  number: 80 # Specify the service port here
+

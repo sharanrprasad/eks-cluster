@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: nignx-demo # If not specified it goes to default.
+  labels:
+    environment: test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      environment: test
+  minReadySeconds: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      name: nginx
+      labels:
+        environment: test
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.16
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 500m # Will allocate 500 milli-core and throttle to 1000 milli-core. Auto scaling percentage defined in hpa is based on this.
+              memory: 256Mi # This is milli-byte
+            limits:
+              cpu: 1000m # For fargate request and limit will be the same as one pod will run inside AWS managed node. For fargate we don't need to specify request and limit.
+              memory: 512Mi
+      restartPolicy: Always
+      serviceAccountName: "some-account-to-be-created-for-iam"
