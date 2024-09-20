@@ -75,3 +75,44 @@ module "eks" {
 
 }
 
+# Addons - Are of two types - EKS native addons + market place addons and Other addons which are installed through helm charts
+# AWS load balancer controller is installed through helm chart.
+# Use this above module to configure EKS native and market place addons like CoreDNS and VPC CNI. It is the best place for that.
+# Blueprint module can be used to easily configure helm chart addons as well - https://aws-ia.github.io/terraform-aws-eks-blueprints-addons/v1.16.3/helm-release/
+
+
+# Example of setting up ALB controller using blueprint
+
+
+#module "eks_blueprints_addons" {
+#  source  = "aws-ia/eks-blueprints-addons/aws"
+#  version = "~> 1.6"
+#
+#  cluster_name                        = module.eks.cluster_name
+#  cluster_endpoint                    = module.eks.cluster_endpoint
+#  cluster_version                     = module.eks.cluster_version
+#  oidc_provider_arn                   = module.eks.oidc_provider_arn
+#  enable_aws_load_balancer_controller = true
+#  aws_load_balancer_controller = {
+#    set = [
+#      {
+#        name  = "vpcId"
+#        value = aws_vpc.eks_vpc.id
+#      },
+#      {
+#        name  = "podDisruptionBudget.maxUnavailable"
+#        value = 1
+#      },
+#      {
+#        name  = "resources.requests.cpu"
+#        value = "100m"
+#      },
+#      {
+#        name  = "resources.requests.memory"
+#        value = "128Mi"
+#      },
+#    ]
+#  }
+#}
+
+

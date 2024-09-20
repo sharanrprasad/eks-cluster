@@ -45,12 +45,13 @@ resource "aws_iam_role_policy_attachment" "fargate_s3_policy" {
 
 
 
-# Service account to be created with in EKS. This service account has a namespace and in the role we can say specify the
-# service accounts within in a namespace that can assume the role as well.
+# Note that this resource is from Kubernetes and from AWS provider.
+# Service account to be created with in EKS. This service account has a namespace and in the role we can specify the
+# service accounts within in a namespace that can assume the role as well. Just like above.
 resource "kubernetes_service_account" "fargate_s3_service_account" {
   metadata {
-    name      = "over-reacted-cluster-fargate"
-    namespace = "fargate-cluster"
+    name      = local.cluster_fargate-service-account-name
+    namespace = local.cluster_fargate_service_account_namespace
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.fargate_s3_role.arn
     }
@@ -59,4 +60,4 @@ resource "kubernetes_service_account" "fargate_s3_service_account" {
 
 # Specify the service account name in the deployment yaml file like this
 # spec:
-# serviceAccountName: my-service-account  # Link the service account here
+# serviceAccountName: fargate-cluster  # Link the service account here

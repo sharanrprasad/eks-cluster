@@ -37,7 +37,7 @@ resource "aws_subnet" "eks_vpc_public_subnets" {
     name     = "public-subnet-${count.index + 1}"
     resource = "eks-demo"
     tier     = "public"
-    # These tags are required by K8s control plane.
+    # These tags are required by K8s control plane and also AWS load balancer controller to auto discover public subnets.
     "kubernetes.io/role/elb"                      = "1"
     "kubernetes.io/cluster/${local.cluster_name}" = "owned"
   }
@@ -50,9 +50,10 @@ resource "aws_subnet" "eks_vpc_private_subnets" {
   availability_zone = element(local.azs, count.index)
 
   tags = {
-    name                                          = "private-subnet-${count.index + 1}"
-    resource                                      = "eks-demo"
-    tier                                          = "private"
+    name     = "private-subnet-${count.index + 1}"
+    resource = "eks-demo"
+    tier     = "private"
+    # Required for auto discovery of private subnets by different K8s resources.
     "kubernetes.io/role/internal-elb"             = "1"
     "kubernetes.io/cluster/${local.cluster_name}" = "owned"
   }
@@ -79,7 +80,7 @@ resource "aws_route_table" "eks_vpc_public_route_table" {
   tags = {
     name        = "over-reacted-cluster-vpc-public-table"
     resource    = "over-reacted-cluster-vpc"
-    Description = "Route table for over-reacted-cluster-vpc VPC public subnets"
+    description = "Route table for over-reacted-cluster-vpc VPC public subnets"
   }
 }
 
