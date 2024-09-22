@@ -69,6 +69,10 @@ resource "kubernetes_service_account" "aws_load_balancer_service_account" {
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
+    labels = {
+      "app.kubernetes.io/name"      = "aws-load-balancer-controller"
+      "app.kubernetes.io/component" = "controller"
+    }
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.aws_lb_ingress_controller_role.arn
     }
@@ -109,6 +113,17 @@ resource "helm_release" "aws_load_balancer_controller" {
   set {
     name  = "podDisruptionBudget.maxUnavailable"
     value = 1
+  }
+
+  set {
+    name  = "clusterSecretsPermissions.allowAllSecrets"
+    value = "true"
+  }
+
+  set {
+    # Only ingress resources with this class name will be managed by this ingress-controller. alb is the default value as well.
+    name  = "ingressClass"
+    value = "alb"
   }
 
   depends_on = [

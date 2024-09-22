@@ -14,3 +14,18 @@ Installing a release - `helm install -f values-override.yaml release-name bitnam
 # Destroy 
 
 Use helm uninstall command 
+
+
+# Test the template values 
+
+`helm install --debug --dry-run release-name ./chart-folder`
+
+# Helm namespace 
+
+When installing we can also specify a namespace. This is a kubernetes namespace where helm chart files will be stored. 
+
+Example - `helm install release-name ./chart-folder-name --namespace dev`. 
+
+With this we can make sure that we install the same chart multiple times in different namespaces. 
+
+We also need to make sure the namespaces of deployments are also in different namespaces. 
