@@ -1,68 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fargate-service-1.fullname" . }}
+  name: "fargate-service-deployment"
+  # This namespace needs to be created in Terraform as service account will also be in this namespace.
+  namespace: {{ quote .Values.chartNameSpace }}
   labels:
-    {{- include "fargate-service-1.labels" . | nindent 4 }}
+    app: "fargate-service-1" # This the label for the deployment itself and not the pod.
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: 1
   selector:
     matchLabels:
-      {{- include "fargate-service-1.selectorLabels" . | nindent 6 }}
+      # This is to maintain replicas. Selecting pod template labels here.
+      app: "fargate-service-1"
   template:
+    # This is the metadata for the pod and not for the deployment.
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      name: "fargate-service-1"
+      namespace: {{ quote .Values.chartNameSpace }}
       labels:
-        {{- include "fargate-service-1.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app: "fargate-service-1"
+        chart: {{ quote .Chart.Name }}
+        release: {{ quote .Release.Name }}
+        version:
+      annotations:
+        "kubernetes.io/managed-by": "helm"
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "fargate-service-1.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ quote .Values.image.repository }}
+          image: {{ quote .Values.image.imageVersion }}
+          imagePullPolicy: {{ quote .Values.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
+            - containerPort: 80
               protocol: TCP
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
-      volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+            requests:
+              cpu: "0.25"
+              memory: "256M"
+            limits:
+              cpu: "0.25"
+              memory: "256M"
+      restartPolicy: Always
+      serviceAccountName: "cluster-fargate-s3-sa"
+

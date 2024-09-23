@@ -2,29 +2,29 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.ingress.name }}
-  namespace: 'default'
+  namespace: "default"
   annotations:
     alb.ingress.kubernetes.io/scheme: internal
     alb.ingress.kubernetes.io/target-type: instance
-    alb.ingress.kubernetes.io/load-balancer-name: ''
+    alb.ingress.kubernetes.io/load-balancer-name: ""
     alb.ingress.kubernetes.io/backend-protocol: HTTP
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    alb.ingress.kubernetes.io/listen-ports: "[{'HTTP':80}]"
 spec:
   # Only ingress with class names alb are picked by AWS load balancer controller ingress controller.
-  ingressClassName: 'alb'
+  ingressClassName: "alb"
   defaultBackend:
     service:
       name: {{ .Values.service.name }}
       port:
         number: {{ .Values.service.port }}
   rules:
-    - host: 'fargate-service.com'
+    - host: "fargate-service.com"
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ .Values.service.name }}
+                name: {{ quote .Values.service.name }}
                 port:
-                  number: {{ .Values.service.port }}
+                  number: {{ quote .Values.service.port }}
