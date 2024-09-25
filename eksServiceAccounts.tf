@@ -67,14 +67,18 @@ resource "kubernetes_namespace" "fargate_cluster" {
 resource "kubernetes_service_account" "fargate_s3_service_account" {
   metadata {
     name        = local.cluster_s3_access_sa_name
-    namespace   = local.cluster_fargate_namespace
+    namespace   = kubernetes_namespace.fargate_cluster.metadata[0].name
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.fargate_s3_role.arn
     }
   }
-  depends_on = [module.eks]
 }
 
 # Specify the service account name in the deployment yaml file like this
 # spec:
 # serviceAccountName: fargate-cluster  # Link the service account here
+
+
+
+# Pod identity is another way to bind service account with IAM roles. It is a bit more flexible doesn't require OIDC provider -
+# https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html
