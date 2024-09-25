@@ -72,7 +72,6 @@ module "eks" {
       ]
     }
   }
-
 }
 
 # Addons - Are of two types - EKS native addons + market place addons and Other addons which are installed through helm charts

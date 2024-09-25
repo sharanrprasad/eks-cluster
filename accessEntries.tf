@@ -5,7 +5,8 @@
 
 # Usually this will be a role for Federated login (users assume role there) and must be defined in the variables.
 locals {
-  access_entry_principles = ["arn:aws:iam::024848477348:user/sharanrpadmin"]
+  access_entry_principles = ["arn:aws:iam::024848477348:user/someuserarn"]
+  # Also note that access entries with admin permission is given by default to the role or user used to create the cluster so this might be double up.
 }
 
 
